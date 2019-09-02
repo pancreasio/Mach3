@@ -5,8 +5,12 @@ using UnityEngine;
 public class Grid
 {
     public enum ChipType {R,G,B,P};
+    private ChipType [,] chipInstances;
 
-    private ChipType [,]chipInstances = new ChipType [7,7];
+    public Grid NewGrid(int x, int y) {
+        chipInstances = new ChipType[x, y];
+        return this;
+    }
 
     public void SetChip(ChipType newChip, int x, int y)
     {
