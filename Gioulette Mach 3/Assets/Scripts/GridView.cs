@@ -4,13 +4,5 @@ using UnityEngine;
 
 public class GridView : MonoBehaviour
 {
-    private void Start()
-    {
-        
-    }
-
-    private void Update()
-    {
-        
-    }
+    
 }
