@@ -35,6 +35,29 @@ public class GridController : MonoBehaviour
         }
     }
 
+    private void SwapChip()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+        if (hit)
+        {
+            Vector2Int chipPosition = view.GetChipPosition(hit.transform.gameObject);
+            if (!isChipStored)
+            {
+                storedChip = grid.GetChip(chipPosition.x, chipPosition.y);
+                storedPosition = chipPosition;
+                isChipStored = true;
+            }
+            else
+            {
+                grid.SetChip(grid.GetChip(chipPosition.x, chipPosition.y), storedPosition.x, storedPosition.y);
+                grid.SetChip(storedChip, chipPosition.x, chipPosition.y);
+                isChipStored = false;
+                view.EraseGrid();
+                view.DrawGrid(grid);
+            }
+        }
+    }
+
     private void Update()
     {
         if (!initialized)
@@ -45,28 +68,7 @@ public class GridController : MonoBehaviour
         }
         if (Input.GetMouseButtonDown(0))
         {
-            RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-            if (hit)
-            {
-                Vector2Int chipPosition = view.GetChipPosition(hit.transform.gameObject);
-                if (!isChipStored)
-                {
-                    storedChip = grid.GetChip(chipPosition.x, chipPosition.y);
-                    storedPosition = chipPosition;
-                    Debug.Log("stored");
-                    isChipStored = true;
-                }
-                else
-                {
-                    grid.SetChip(grid.GetChip(chipPosition.x, chipPosition.y), storedPosition.x, storedPosition.y);
-                    grid.SetChip(storedChip, chipPosition.x, chipPosition.y);
-                    isChipStored = false;
-                    Debug.Log("swapped");
-                    view.EraseGrid();
-                    view.DrawGrid(grid);
-                    Debug.Log("redrawn");
-                }
-            }
+            SwapChip();
         }
     }
 }
