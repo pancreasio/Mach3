@@ -22,34 +22,65 @@ public class GridView : MonoBehaviour
         {
             for (int i2 = 0; i2 < height; i2++)
             {
-                DrawChip(grid.GetChip(i, i2), i, i2);
-                Debug.Log("drawing chip: " + i + " " + i2);
+                goArray[i,i2] = InstantiateChip(grid.GetChip(i, i2), i, i2);
             }
         }
     }
 
-    private void DrawChip(Grid.ChipType chip, int x, int y)
+    public void EraseGrid()
+    {
+        for (int i = 0; i < width; i++)
+        {
+            for (int i2 = 0; i2 < height; i2++)
+            {
+                Destroy(goArray[i, i2].gameObject);
+            }
+        }
+    }
+
+    private GameObject InstantiateChip(Grid.ChipType chip, int x, int y)
     {
         float newX = new float();
         float newY = new float();
         newX = -2.0f + x * 0.571f;
         newY = -4.2f + y * 0.97f;
+        GameObject resultGO;
         switch (chip)
         {
             case Grid.ChipType.R:
-                Instantiate(redPrefab, new Vector2(newX, newY), Quaternion.identity);
+                resultGO = Instantiate(redPrefab, new Vector2(newX, newY), Quaternion.identity);
                 break;
             case Grid.ChipType.G:
-                Instantiate(greenPrefab, new Vector2(newX, newY), Quaternion.identity);
+                resultGO = Instantiate(greenPrefab, new Vector2(newX, newY), Quaternion.identity);
                 break;
             case Grid.ChipType.B:
-                Instantiate(bluePrefab, new Vector2(newX, newY), Quaternion.identity);
+                resultGO = Instantiate(bluePrefab, new Vector2(newX, newY), Quaternion.identity);
                 break;
             case Grid.ChipType.P:
-                Instantiate(pinkPrefab, new Vector2(newX, newY), Quaternion.identity);
+                resultGO = Instantiate(pinkPrefab, new Vector2(newX, newY), Quaternion.identity);
                 break;
             default:
+                resultGO = null;
                 break;
         }
+        return resultGO;
+    }
+
+    public Vector2Int GetChipPosition(GameObject chipGO)
+    {
+        Vector2Int resultPosition = new Vector2Int();
+        for (int i = 0; i < width; i++)
+        {
+            for (int i2 = 0; i2 < height; i2++)
+            {
+                if (goArray[i, i2] == chipGO)
+                {
+                    resultPosition.x = i;
+                    resultPosition.y = i2;
+                }
+            }
+        }
+
+        return resultPosition;
     }
 }
