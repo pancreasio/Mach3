@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Grid
 {
-    public enum ChipType {R,G,B,P};
+    public enum ChipType {R,G,B,P,NULLCHIP};
     private ChipType [,] chipInstances;
 
     public Grid NewGrid(int x, int y) {

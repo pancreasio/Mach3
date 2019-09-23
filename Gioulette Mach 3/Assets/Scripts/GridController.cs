@@ -16,9 +16,17 @@ public class GridController : MonoBehaviour
     private void Start()
     {
         grid = new Grid();
+        GenerateGrid();
+        for (int i = 0; i < 100; i++)
+        {
+            if (!SpawnCheck())
+            {
+                Debug.Log("total checks: " + i + 1);
+                i = 100;
+            }
+        }
         view = GameObject.Find("GridView").GetComponent<GridView>();
         initialized = false;
-        GenerateGrid();
         isChipStored = false;
         storedPosition = new Vector2Int();
     }
@@ -66,6 +74,92 @@ public class GridController : MonoBehaviour
         }
     }
 
+    private bool SpawnCheck()
+    {
+        List<Vector2Int> rerollList = new List<Vector2Int>();
+        uint repeatCounter = 0;
+        bool result = false;
+        Grid.ChipType previousChip = Grid.ChipType.NULLCHIP;
+
+        //check vertical matches
+        for (int widthCount = 0; widthCount < width; widthCount++)
+        {
+            for (int heightCount = 0; heightCount < height; heightCount++)
+            {
+                if (grid.GetChip(widthCount, heightCount) == previousChip)
+                {
+                    repeatCounter++;
+                    if (repeatCounter > 1)
+                    {
+                        rerollList.Add(new Vector2Int(widthCount, heightCount));
+                        result = true;
+
+                        if (repeatCounter == 3)
+                        {
+                            rerollList.Add(new Vector2Int(widthCount, heightCount - 1));
+                            rerollList.Add(new Vector2Int(widthCount, heightCount - 2));
+                        }
+                    }
+                }
+                else
+                {
+                    repeatCounter = 0;
+                    previousChip = grid.GetChip(widthCount, heightCount);
+                }
+            }
+            previousChip = Grid.ChipType.NULLCHIP;
+            repeatCounter = 0;
+        }
+
+        //check horizontal matches
+        for (int heightCount = 0; heightCount < height; heightCount++)
+        {
+            for (int widthCount = 0; widthCount < width; widthCount++)
+            {
+                if (grid.GetChip(widthCount, heightCount) == previousChip)
+                {
+                    repeatCounter++;
+                    if (repeatCounter > 1)
+                    {
+                        if (!rerollList.Contains(new Vector2Int(widthCount, heightCount)))
+                            rerollList.Add(new Vector2Int(widthCount, heightCount));
+
+                        result = true;
+
+                        if (repeatCounter == 3)
+                        {
+                            if (!rerollList.Contains(new Vector2Int(widthCount - 1, heightCount)))
+                                rerollList.Add(new Vector2Int(widthCount - 1, heightCount));
+
+                            if (!rerollList.Contains(new Vector2Int(widthCount - 2, heightCount)))
+                                rerollList.Add(new Vector2Int(widthCount - 2, heightCount));
+                        }
+                    }
+                }
+                else
+                {
+                    repeatCounter = 0;
+                    previousChip = grid.GetChip(widthCount, heightCount);
+                }
+
+            }
+            previousChip = Grid.ChipType.NULLCHIP;
+            repeatCounter = 0;
+        }
+
+
+        //reroll matching chips
+        foreach (Vector2Int chipPosition in rerollList)
+        {
+            previousChip = grid.GetChip(chipPosition.x, chipPosition.y);
+            while (previousChip == grid.GetChip(chipPosition.x, chipPosition.y))
+            {
+                grid.SetChip((Grid.ChipType)Random.Range((int)0, (int)4), chipPosition.x, chipPosition.y);
+            }
+        }
+        return result;
+    }
+
     private void Update()
     {
         if (!initialized)
@@ -77,6 +171,12 @@ public class GridController : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             SwapChip();
+        }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            SpawnCheck();
+            view.EraseGrid();
+            view.DrawGrid(grid);
         }
     }
 }
