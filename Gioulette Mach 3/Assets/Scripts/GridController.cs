@@ -49,11 +49,19 @@ public class GridController : MonoBehaviour
             }
             else
             {
-                grid.SetChip(grid.GetChip(chipPosition.x, chipPosition.y), storedPosition.x, storedPosition.y);
-                grid.SetChip(storedChip, chipPosition.x, chipPosition.y);
-                isChipStored = false;
-                view.EraseGrid();
-                view.DrawGrid(grid);
+                if (Mathf.Abs(chipPosition.x - storedPosition.x) == 1 && Mathf.Abs(chipPosition.y - storedPosition.y) == 0
+                    || Mathf.Abs(chipPosition.x - storedPosition.x) == 0 && Mathf.Abs(chipPosition.y - storedPosition.y) == 1)
+                {
+                    grid.SetChip(grid.GetChip(chipPosition.x, chipPosition.y), storedPosition.x, storedPosition.y);
+                    grid.SetChip(storedChip, chipPosition.x, chipPosition.y);
+                    isChipStored = false;
+                    view.EraseGrid();
+                    view.DrawGrid(grid);
+                }
+                else
+                {
+                    isChipStored = false;
+                }
             }
         }
     }
