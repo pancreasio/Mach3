@@ -12,6 +12,7 @@ public class GridController : MonoBehaviour
     public bool initialized;
     private bool isChipStored;
     private Vector2Int storedPosition;
+    private List<Vector2Int> nullPositions;
 
     private void Start()
     {
@@ -29,6 +30,7 @@ public class GridController : MonoBehaviour
         initialized = false;
         isChipStored = false;
         storedPosition = new Vector2Int();
+        nullPositions = new List<Vector2Int>();
     }
 
     private void GenerateGrid()
@@ -43,7 +45,7 @@ public class GridController : MonoBehaviour
         }
     }
 
-    private void SwapChip()
+    private void UserAction()
     {
         RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
         if (hit)
@@ -60,13 +62,21 @@ public class GridController : MonoBehaviour
                 if (Mathf.Abs(chipPosition.x - storedPosition.x) == 1 && Mathf.Abs(chipPosition.y - storedPosition.y) == 0
                     || Mathf.Abs(chipPosition.x - storedPosition.x) == 0 && Mathf.Abs(chipPosition.y - storedPosition.y) == 1)
                 {
-                    grid.SetChip(grid.GetChip(chipPosition.x, chipPosition.y), storedPosition.x, storedPosition.y);
-                    grid.SetChip(storedChip, chipPosition.x, chipPosition.y);
+                    SwapChips(chipPosition, storedPosition);
                     isChipStored = false;
-                    CheckAndClearLine(storedPosition.x, true);
-                    CheckAndClearLine(storedPosition.y, false);
-                    CheckAndClearLine(chipPosition.x, true);
-                    CheckAndClearLine(chipPosition.y, false);
+                    if (chipPosition.x == storedPosition.x)
+                    {
+                        CheckAndClearLine(storedPosition.x, true);
+                        CheckAndClearLine(storedPosition.y, false);
+                        CheckAndClearLine(chipPosition.y, false);
+                    }
+                    else
+                    {
+                        CheckAndClearLine(storedPosition.x, true);
+                        CheckAndClearLine(storedPosition.y, false);
+                        CheckAndClearLine(chipPosition.x, true);
+                    }
+                    //Cascade();
                     view.EraseGrid();
                     view.DrawGrid(grid);
                 }
@@ -76,6 +86,13 @@ public class GridController : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void SwapChips(Vector2Int chipPosition1, Vector2Int chipPosition2)
+    {
+        Grid.ChipType auxChip = grid.GetChip(chipPosition2.x, chipPosition2.y);
+        grid.SetChip(grid.GetChip(chipPosition1.x, chipPosition1.y), chipPosition2.x, chipPosition2.y);
+        grid.SetChip(auxChip, chipPosition1.x, chipPosition1.y);
     }
 
     private void CheckAndClearLine(int line, bool vertical)
@@ -142,8 +159,32 @@ public class GridController : MonoBehaviour
         //clear repeats
         foreach (Vector2Int chipPosition in clearList)
         {
-            grid.SetChip(Grid.ChipType.NULLCHIP, chipPosition.x, chipPosition.y);
+            if (chipPosition.x >= 0 && chipPosition.x < width)
+            {
+                if (chipPosition.y >= 0 && chipPosition.y < height)
+                {
+                    grid.SetChip(Grid.ChipType.NULLCHIP, chipPosition.x, chipPosition.y);
+                    nullPositions.Add(new Vector2Int(chipPosition.x, chipPosition.y));
+                }
+            }
         }
+    }
+
+    private void Cascade()
+    {
+        foreach (Vector2Int clearTile in nullPositions)
+        {
+            for (int i = clearTile.y + 1; i < height; i++)
+            {
+                SwapChips(new Vector2Int(clearTile.x, i), new Vector2Int(clearTile.x, i - 1));
+            }
+        }
+        nullPositions.Clear();
+    }
+
+    private void Refill()
+    {
+
     }
 
     private bool SpawnCheck()
@@ -242,7 +283,7 @@ public class GridController : MonoBehaviour
         }
         if (Input.GetMouseButtonDown(0))
         {
-            SwapChip();
+            UserAction();
         }
         if (Input.GetKeyDown(KeyCode.R))
         {
