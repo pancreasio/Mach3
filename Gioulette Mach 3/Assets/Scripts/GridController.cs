@@ -63,6 +63,10 @@ public class GridController : MonoBehaviour
                     grid.SetChip(grid.GetChip(chipPosition.x, chipPosition.y), storedPosition.x, storedPosition.y);
                     grid.SetChip(storedChip, chipPosition.x, chipPosition.y);
                     isChipStored = false;
+                    CheckAndClearLine(storedPosition.x, true);
+                    CheckAndClearLine(storedPosition.y, false);
+                    CheckAndClearLine(chipPosition.x, true);
+                    CheckAndClearLine(chipPosition.y, false);
                     view.EraseGrid();
                     view.DrawGrid(grid);
                 }
@@ -71,6 +75,74 @@ public class GridController : MonoBehaviour
                     isChipStored = false;
                 }
             }
+        }
+    }
+
+    private void CheckAndClearLine(int line, bool vertical)
+    {
+        uint repeatCounter = 0;
+        Grid.ChipType previousChip = Grid.ChipType.NULLCHIP;
+        List<Vector2Int> clearList = new List<Vector2Int>();
+
+        if (vertical)
+        {
+            for (int heightCount = 0; heightCount < height; heightCount++)
+            {
+                if (grid.GetChip(line, heightCount) == previousChip)
+                {
+                    repeatCounter++;
+                    if (repeatCounter > 1)
+                    {
+                        clearList.Add(new Vector2Int(line, heightCount));
+
+                        if (repeatCounter == 2)
+                        {
+                            clearList.Add(new Vector2Int(line, heightCount - 1));
+                            clearList.Add(new Vector2Int(line, heightCount - 2));
+                        }
+                    }
+                }
+                else
+                {
+                    repeatCounter = 0;
+                    previousChip = grid.GetChip(line, heightCount);
+                }
+            }
+        }
+        else
+        {
+            for (int widthCount = 0; widthCount < width; widthCount++)
+            {
+                if (grid.GetChip(widthCount, line) == previousChip)
+                {
+                    repeatCounter++;
+                    if (repeatCounter > 1)
+                    {
+                        if (!clearList.Contains(new Vector2Int(widthCount, line)))
+                            clearList.Add(new Vector2Int(widthCount, line));
+
+                        if (repeatCounter == 2)
+                        {
+                            if (!clearList.Contains(new Vector2Int(widthCount - 1, line)))
+                                clearList.Add(new Vector2Int(widthCount - 1, line));
+
+                            if (!clearList.Contains(new Vector2Int(widthCount - 2, line)))
+                                clearList.Add(new Vector2Int(widthCount - 2, line));
+                        }
+                    }
+                }
+                else
+                {
+                    repeatCounter = 0;
+                    previousChip = grid.GetChip(widthCount, line);
+                }
+            }
+        }
+
+        //clear repeats
+        foreach (Vector2Int chipPosition in clearList)
+        {
+            grid.SetChip(Grid.ChipType.NULLCHIP, chipPosition.x, chipPosition.y);
         }
     }
 

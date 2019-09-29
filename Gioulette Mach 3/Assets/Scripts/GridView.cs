@@ -33,6 +33,7 @@ public class GridView : MonoBehaviour
         {
             for (int i2 = 0; i2 < height; i2++)
             {
+                if (goArray[i,i2])
                 Destroy(goArray[i, i2].gameObject);
             }
         }
