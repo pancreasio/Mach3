@@ -76,7 +76,7 @@ public class GridController : MonoBehaviour
                         CheckAndClearLine(storedPosition.y, false);
                         CheckAndClearLine(chipPosition.x, true);
                     }
-                    //Cascade();
+                    Cascade();
                     view.EraseGrid();
                     view.DrawGrid(grid);
                 }
@@ -287,9 +287,8 @@ public class GridController : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.R))
         {
-            SpawnCheck();
-            view.EraseGrid();
-            view.DrawGrid(grid);
+            Cascade();
+            Debug.Log("cascaded");
         }
     }
 }
